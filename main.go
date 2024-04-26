@@ -30,11 +30,10 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 		action := r.FormValue("action")
 		if action == "start" {
 			startNginx()
-			fmt.Fprintln(w, "Nginx started")
 		} else if action == "stop" {
 			stopNginx()
-			fmt.Fprintln(w, "Nginx stopped")
 		}
+		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to the home page
 	} else {
 		http.Error(w, "Invalid request method.", 405)
 	}
