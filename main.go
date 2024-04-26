@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os/exec"
+	"strings"
 )
 
 func main() {
@@ -40,10 +41,11 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func nginxStatus() bool {
-	cmd := exec.Command("tasklist", `/fi "imagename eq Notepad2.exe"`)
+	processName := "Notepad2.exe"
+	cmd := exec.Command("tasklist", "/fi", fmt.Sprintf("imagename eq %s", processName))
+
 	if output, err := cmd.Output(); err == nil {
-		fmt.Println(string(output))
-		return string(output) != ""
+		return strings.Contains(string(output), processName)
 	}
 	return false
 }
