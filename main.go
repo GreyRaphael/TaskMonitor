@@ -16,13 +16,13 @@ func main() {
 }
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
-	status := nginxStatus()
-	fmt.Println("Nginx status:", status)
-	if status {
-		fmt.Fprintln(w, "Nginx is running")
+	var html string
+	if nginxStatus() {
+		html = `<html><body><p>Nginx is running.</p><form action="/control" method="post"><input type="submit" name="action" value="stop"/></form></body></html>`
 	} else {
-		fmt.Fprintln(w, "Nginx is stopped")
+		html = `<html><body><p>Nginx is stopped.</p><form action="/control" method="post"><input type="submit" name="action" value="start"/></form></body></html>`
 	}
+	fmt.Fprintln(w, html)
 }
 
 func controlHandler(w http.ResponseWriter, r *http.Request) {
