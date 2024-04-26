@@ -41,7 +41,7 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func nginxStatus() bool {
-	processName := "Notepad2.exe"
+	processName := "nginx.exe"
 	cmd := exec.Command("tasklist", "/fi", fmt.Sprintf("imagename eq %s", processName))
 
 	if output, err := cmd.Output(); err == nil {
@@ -51,9 +51,9 @@ func nginxStatus() bool {
 }
 
 func startNginx() {
-	exec.Command("cmd", "/c", "start", "nginx").Run()
+	exec.Command("cmd", "/c", "start", "./nginx.exe").Run()
 }
 
 func stopNginx() {
-	exec.Command("nginx", "-s", "stop").Run()
+	exec.Command("taskkill", "/F", "/IM", "nginx.exe").Run()
 }
