@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+        }
+
+        table {
+            width: 800px;
+            height: 120px;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #ddd;
+        }
+
+        th {
+            background-color: deepskyblue;
+        }
+
+        .block {
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .start {
+            background-color: #04AA6D;
+        }
+
+        .stop {
+            background-color: tomato;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        {{if .Running}}
+        <h2>FIX Proxy is running!</h2>
+        <form action="/control" method="post"><input type="submit" name="action" value="stop" class="block stop" />
+        </form>
+        {{else}}
+        <h2>FIX Proxy is stopped!</h2>
+        <form action="/control" method="post"><input type="submit" name="action" value="start" class="block start" />
+        </form>
+        {{end}}
+        <table>
+            <tr>
+                <th>StatFields</th>
+                <th>Number</th>
+            </tr>
+            <tr>
+                <td>Active connections</td>
+                <td>{{.ActiveNum}}</td>
+            </tr>
+            <tr>
+                <td>Accepts requests</td>
+                <td>{{.AcceptedNum}}</td>
+            </tr>
+            <tr>
+                <td>Handled requests</td>
+                <td>{{.HandledNum}}</td>
+            </tr>
+
+        </table>
+    </div>
+</body>
+
+</html>

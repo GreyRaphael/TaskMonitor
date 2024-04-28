@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os/exec"
+	"regexp"
 	"strings"
+	"text/template"
+	"time"
 )
 
 var (
@@ -32,14 +36,55 @@ func basicAuth(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+type nginxState struct {
+	Running     bool
+	ActiveNum   string
+	AcceptedNum string
+	HandledNum  string
+}
+
 func statusHandler(w http.ResponseWriter, r *http.Request) {
-	var html string
-	if nginxStatus() {
-		html = `<html><body><p>Nginx is running.</p><form action="/control" method="post"><input type="submit" name="action" value="stop"/></form></body></html>`
-	} else {
-		html = `<html><body><p>Nginx is stopped.</p><form action="/control" method="post"><input type="submit" name="action" value="start"/></form></body></html>`
+	state := getNginxState()
+	tmpl, err := template.ParseFiles("template.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	fmt.Fprintln(w, html)
+
+	if err := tmpl.Execute(w, state); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+}
+
+func getNginxState() nginxState {
+	isRunning := nginxStatus()
+	if isRunning {
+		resp, err := http.Get("http://127.0.0.1/nginx_status")
+		if err != nil {
+			return nginxState{false, "0", "0", "0"}
+		}
+		defer resp.Body.Close()
+
+		// Read the response body
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nginxState{false, "0", "0", "0"}
+		}
+
+		// Parse the response body
+		re := regexp.MustCompile(`\d+`)
+		matches := re.FindAllString(string(body), 3)
+
+		return nginxState{
+			isRunning,
+			matches[0],
+			matches[1],
+			matches[2],
+		}
+	} else {
+		return nginxState{isRunning, "0", "0", "0"}
+	}
 }
 
 func controlHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,9 +95,10 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 		} else if action == "stop" {
 			stopNginx()
 		}
-		http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect to the home page
+		time.Sleep(time.Second) // sleep 1s, then Redirect to the home page
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	} else {
-		http.Error(w, "Invalid request method.", 405)
+		http.Error(w, "Invalid request method.", http.StatusMethodNotAllowed)
 	}
 }
 
