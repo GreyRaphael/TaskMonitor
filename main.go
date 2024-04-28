@@ -12,13 +12,18 @@ import (
 	"time"
 )
 
-var (
+const (
 	username = "admin"
 	password = "123456"
 )
 
 func main() {
-	http.HandleFunc("/", basicAuth(statusHandler))
+	tmpl, err := template.ParseFiles("template.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.HandleFunc("/", basicAuth(statusHandler(tmpl)))
 	http.HandleFunc("/control", basicAuth(controlHandler))
 	log.Println("Server starting on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -36,25 +41,13 @@ func basicAuth(handler http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-type nginxState struct {
-	Running     bool
-	ActiveNum   string
-	AcceptedNum string
-	HandledNum  string
-}
-
-func statusHandler(w http.ResponseWriter, r *http.Request) {
-	state := getNginxState()
-	tmpl, err := template.ParseFiles("template.html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+func statusHandler(tmpl *template.Template) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		state := getNginxState()
+		if err := tmpl.Execute(w, state); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 	}
-
-	if err := tmpl.Execute(w, state); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-
 }
 
 func getNginxState() nginxState {
@@ -77,24 +70,25 @@ func getNginxState() nginxState {
 		matches := re.FindAllString(string(body), 3)
 
 		return nginxState{
-			isRunning,
+			true,
 			matches[0],
 			matches[1],
 			matches[2],
 		}
-	} else {
-		return nginxState{isRunning, "0", "0", "0"}
 	}
+	return nginxState{false, "0", "0", "0"}
 }
 
 func controlHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		action := r.FormValue("action")
-		if action == "start" {
+		switch action {
+		case "start":
 			startNginx()
-		} else if action == "stop" {
+		case "stop":
 			stopNginx()
 		}
+
 		time.Sleep(time.Second) // sleep 1s, then Redirect to the home page
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	} else {
@@ -118,4 +112,11 @@ func startNginx() {
 
 func stopNginx() {
 	exec.Command("taskkill", "/F", "/IM", "nginx.exe").Run()
+}
+
+type nginxState struct {
+	Running     bool
+	ActiveNum   string
+	AcceptedNum string
+	HandledNum  string
 }
