@@ -55,14 +55,14 @@ func getNginxState() nginxState {
 	if isRunning {
 		resp, err := http.Get("http://127.0.0.1/nginx_status")
 		if err != nil {
-			return nginxState{false, "0", "0", "0"}
+			return nginxState{true, "cannot visit /nginx_status", "cannot visit /nginx_status", "cannot visit /nginx_status"}
 		}
 		defer resp.Body.Close()
 
 		// Read the response body
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return nginxState{false, "0", "0", "0"}
+			return nginxState{true, "parse /nginx_status eror", "parse /nginx_status eror", "parse /nginx_status eror"}
 		}
 
 		// Parse the response body
