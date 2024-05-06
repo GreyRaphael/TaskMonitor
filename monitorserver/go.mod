@@ -1,3 +1,3 @@
-module monitor
+module monitorserver
 
 go 1.22.0
