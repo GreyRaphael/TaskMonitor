@@ -89,7 +89,7 @@ func controlHandler(w http.ResponseWriter, r *http.Request) {
 			stopNginx()
 		}
 
-		time.Sleep(time.Second) // sleep 1s, then Redirect to the home page
+		time.Sleep(3 * time.Second) // sleep 1s, then Redirect to the home page
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	} else {
 		http.Error(w, "Invalid request method.", http.StatusMethodNotAllowed)
