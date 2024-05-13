@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"os"
 )
 
 // App struct
@@ -23,5 +24,23 @@ func (a *App) startup(ctx context.Context) {
 
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
+	config := loadConfig()
+	return config.URL
+}
+
+type Config struct {
+	URL string `json:"url"`
+}
+
+func loadConfig() Config {
+	var config Config
+	data, err := os.ReadFile("config.json")
+	if err != nil {
+		panic(err)
+	}
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		panic(err)
+	}
+	return config
 }

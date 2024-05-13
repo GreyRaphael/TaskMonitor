@@ -2,8 +2,6 @@ package main
 
 import (
 	"embed"
-	"encoding/json"
-	"os"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -13,25 +11,7 @@ import (
 //go:embed all:frontend/dist
 var assets embed.FS
 
-type Config struct {
-	URL string `json:"url"`
-}
-
-func loadConfig() Config {
-	var config Config
-	data, err := os.ReadFile("config.json")
-	if err != nil {
-		panic(err)
-	}
-	err = json.Unmarshal(data, &config)
-	if err != nil {
-		panic(err)
-	}
-	return config
-}
-
 func main() {
-	config := loadConfig()
 	// Create an instance of the app structure
 	app := NewApp()
 
@@ -47,7 +27,6 @@ func main() {
 		OnStartup: app.startup,
 		Bind: []interface{}{
 			app,
-			config,
 		},
 	})
 
