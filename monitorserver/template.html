@@ -42,16 +42,27 @@
             background-color: tomato;
         }
     </style>
+    <script>
+        function confirmSubmit() {
+            var confirmAction = confirm("Are you sure to stop?");
+            if (confirmAction) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    </script>
 </head>
 
 <body>
     <div>
         {{if .Running}}
-        <h2>FIX Proxy is running!</h2>
-        <form action="/control" method="post"><input type="submit" name="action" value="stop" class="block stop" />
+        <h2>xxx QFII Controller is running!</h2>
+        <form action="/control" method="post" onsubmit="return confirmSubmit()">
+            <input type="submit" name="action" value="stop" class="block stop" />
         </form>
         {{else}}
-        <h2>FIX Proxy is stopped!</h2>
+        <h2>xxx QFII Controller is stopped!</h2>
         <form action="/control" method="post"><input type="submit" name="action" value="start" class="block start" />
         </form>
         {{end}}
@@ -75,7 +86,7 @@
 
         </table>
         <footer>
-            <p>问题联系: <a href="mailto:gewei@csc.com.cn">gewei@csc.com.cn</a>
+            <p>Copyright &copy; xxxxx 2024</a>
             </p>
         </footer>
     </div>
